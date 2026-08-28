@@ -40,10 +40,10 @@ export default function OnboardingScreen() {
         </Text>
 
         <View className="mt-auto gap-4 pb-3 pt-6">
-          <ChunkyButton onPress={() => router.push('/login')}>Zacznij budować szafę</ChunkyButton>
+          <ChunkyButton onPress={() => router.push('/auth')}>Zacznij budować szafę</ChunkyButton>
           <Pressable
             className="items-center rounded-[14px] border-[2.5px] border-ink bg-white py-4 active:translate-x-0.5 active:translate-y-0.5"
-            onPress={() => router.push('/login')}>
+            onPress={() => router.push({ pathname: '/auth', params: { mode: 'login' } })}>
             <Text className="text-base font-bold text-ink">Mam już konto</Text>
           </Pressable>
         </View>
