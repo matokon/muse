@@ -1,0 +1,23 @@
+pl:
+  activerecord:
+    attributes:
+      user:
+        email: "E-mail"
+        password: "Hasło"
+        name: "Imię"
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              blank: "nie może być pusty"
+              invalid: "ma nieprawidłowy format"
+              taken: "jest już zajęty"
+            password:
+              blank: "nie może być puste"
+              too_short: "musi mieć co najmniej %{count} znaków"
+            name:
+              blank: "nie może być puste"
+  auth:
+    invalid_credentials: "Nieprawidłowy e-mail lub hasło"
+    unauthorized: "Sesja wygasła, zaloguj się ponownie"

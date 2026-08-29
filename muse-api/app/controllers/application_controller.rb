@@ -7,7 +7,7 @@ class ApplicationController < ActionController::API
     payload = JsonWebToken.decode(bearer_token)
     @current_user = User.find_by(id: payload[:user_id]) if payload
 
-    render json: { errors: ["Unauthorized"] }, status: :unauthorized unless @current_user
+    render json: { errors: [I18n.t("auth.unauthorized")] }, status: :unauthorized unless @current_user
   end
 
   def bearer_token
