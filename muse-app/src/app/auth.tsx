@@ -5,7 +5,9 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
+import { API_URL } from '@/config';
 import { INK } from '@/constants/theme';
+import { saveToken } from '@/lib/token-storage';
 
 type Mode = 'login' | 'signup';
 
@@ -19,8 +21,41 @@ export default function AuthScreen() {
   const insets = useSafeAreaInsets();
   const { mode: initialMode } = useLocalSearchParams<{ mode?: string }>();
   const [mode, setMode] = useState<Mode>(initialMode === 'login' ? 'login' : 'signup');
-
+  const [form, setForm] = useState({ email: '', password: '', name: '' });
+  const [errors, setErrors] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
   const isLogin = mode === 'login';
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    setErrors([]);
+
+    try {
+      const path = isLogin ? '/login' : '/signup';
+      const body = isLogin
+        ? { email: form.email, password: form.password }
+        : { email: form.email, password: form.password, name: form.name };
+
+      const res = await fetch(`${API_URL}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors(data.errors ?? ['Coś poszło nie tak']);
+        return;
+      }
+
+      await saveToken(data.token);
+      router.replace('/');
+    } catch {
+      setErrors(['Brak połączenia z serwerem']);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <View className="flex-1 bg-surface">
@@ -55,7 +90,25 @@ export default function AuthScreen() {
           <SegmentTab label="Rejestracja" active={!isLogin} onPress={() => setMode('signup')} />
         </View>
 
-        {isLogin ? <LoginFields /> : <SignupFields />}
+        {isLogin ? (
+          <LoginFields
+            name={form.name}
+            email={form.email}
+            password={form.password}
+            onNameChange={(value) => setForm({ ...form, name: value })}
+            onEmailChange={(value) => setForm({ ...form, email: value })}
+            onPasswordChange={(value) => setForm({ ...form, password: value })}
+          />
+        ) : (
+          <SignupFields
+            name={form.name}
+            email={form.email}
+            password={form.password}
+            onNameChange={(value) => setForm({ ...form, name: value })}
+            onEmailChange={(value) => setForm({ ...form, email: value })}
+            onPasswordChange={(value) => setForm({ ...form, password: value })}
+          />
+        )}
 
         <View className="gap-3 rounded-[14px] border-[2.5px] border-ink bg-lavender p-4">
           <Text className="text-[15px] font-bold text-ink">Co dostajesz w Muse</Text>
@@ -67,17 +120,35 @@ export default function AuthScreen() {
           ))}
         </View>
 
-        <ChunkyButton>{isLogin ? 'Zaloguj się' : 'Utwórz konto'}</ChunkyButton>
+        {errors.length > 0 ? (
+          <View className="gap-1 rounded-[14px] border-[2.5px] border-ink bg-header-pink p-4">
+            {errors.map((error) => (
+              <Text key={error} className="text-[13px] text-ink">
+                {error}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+
+        <ChunkyButton onPress={handleSubmit} disabled={submitting}>
+          {isLogin ? 'Zaloguj się' : 'Utwórz konto'}
+        </ChunkyButton>
       </ScrollView>
     </View>
   );
 }
 
-function LoginFields() {
+function LoginFields({ email, password, onEmailChange, onPasswordChange }: AuthFieldsProps) {
   return (
     <View className="gap-4">
-      <Field label="E-mail" placeholder="anna.kowalska@mail.com" keyboardType="email-address" />
-      <Field label="Hasło" secure />
+      <Field
+        label="E-mail"
+        placeholder="anna.kowalska@mail.com"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={onEmailChange}
+      />
+      <Field label="Hasło" secure value={password} onChangeText={onPasswordChange} />
       <Pressable>
         <Text className="self-start font-mono text-[13px] underline text-ink">
           nie pamiętam hasła
@@ -87,14 +158,42 @@ function LoginFields() {
   );
 }
 
-function SignupFields() {
+function SignupFields({
+  name,
+  email,
+  password,
+  onNameChange,
+  onEmailChange,
+  onPasswordChange,
+}: AuthFieldsProps) {
   return (
     <View className="gap-4">
-      <Field label="Imię" placeholder="Anna" autoCapitalize="words" />
-      <Field label="E-mail" placeholder="anna.kowalska@mail.com" keyboardType="email-address" />
-      <Field label="Hasło" secure />
+      <Field
+        label="Imię"
+        placeholder="Anna"
+        autoCapitalize="words"
+        value={name}
+        onChangeText={onNameChange}
+      />
+      <Field
+        label="E-mail"
+        placeholder="anna.kowalska@mail.com"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={onEmailChange}
+      />
+      <Field label="Hasło" secure value={password} onChangeText={onPasswordChange} />
     </View>
   );
+}
+
+type AuthFieldsProps = {
+  name: string;
+  email: string;
+  password: string;
+  onNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
 }
 
 function PasswordToggle({ visible, onPressIn, onPressOut }: PasswordToggleProps) {
@@ -119,6 +218,8 @@ type PasswordToggleProps = {
 
 type FieldProps = {
   label: string;
+  value: string;
+  onChangeText: (value: string) => void;
   placeholder?: string;
   secure?: boolean;
   trailing?: ReactNode;
@@ -129,6 +230,8 @@ type FieldProps = {
 function Field({
   label,
   placeholder,
+  value,
+  onChangeText,
   secure = false,
   trailing,
   keyboardType = 'default',
@@ -143,6 +246,8 @@ function Field({
         <TextInput
           className="rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-4 text-[15px] text-ink"
           placeholder={placeholder}
+          value={value}
+          onChangeText={onChangeText}
           placeholderTextColor="#9A9AAA"
           secureTextEntry={secure && !revealed}
           keyboardType={keyboardType}
