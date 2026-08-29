@@ -18,6 +18,7 @@ type Props = {
   variant?: Variant;
   offset?: number;
   disabled?: boolean;
+  square?: boolean;
 };
 
 const faceColor: Record<Variant, string> = {
@@ -31,6 +32,7 @@ export function ChunkyButton({
   variant = 'primary',
   offset = 4,
   disabled = false,
+  square = false,
 }: Props) {
   const press = useSharedValue(0);
   const travel = offset - 1;
@@ -78,7 +80,8 @@ export function ChunkyButton({
               backgroundColor: faceColor[variant],
               alignItems: 'center',
               justifyContent: 'center',
-              paddingHorizontal: 20,
+              paddingHorizontal: square ? 0 : 20,
+              ...(square ? { width: 54 } : null),
             },
             face,
           ]}>

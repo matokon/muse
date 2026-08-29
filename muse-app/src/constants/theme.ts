@@ -1,6 +1,7 @@
 import type { ViewStyle } from 'react-native';
 
 export const INK = '#14121A';
+export const MUTED = '#5B5B6B';
 
 export function hardShadow(offset = 4): ViewStyle {
   return {
