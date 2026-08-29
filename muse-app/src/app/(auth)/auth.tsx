@@ -44,13 +44,15 @@ export default function AuthScreen() {
       const data = await res.json();
 
       if (!res.ok) {
+        console.warn('[auth] blad z API', res.status, data);
         setErrors(data.errors ?? ['Coś poszło nie tak']);
         return;
       }
 
       await saveToken(data.token);
-      router.replace('/');
-    } catch {
+      router.replace('/wardrobe');
+    } catch (error) {
+      console.error('[auth] handleSubmit', error);
       setErrors(['Brak połączenia z serwerem']);
     } finally {
       setSubmitting(false);
