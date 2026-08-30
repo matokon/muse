@@ -5,6 +5,9 @@ pl:
         email: "E-mail"
         password: "Hasło"
         name: "Imię"
+      clothing_item:
+        name: "Nazwa"
+        photo: "Zdjęcie"
     errors:
       models:
         user:
@@ -18,6 +21,15 @@ pl:
               too_short: "musi mieć co najmniej %{count} znaków"
             name:
               blank: "nie może być puste"
+        clothing_item:
+          attributes:
+            name:
+              blank: "nie może być pusta"
+            photo:
+              invalid_content_type: "musi być plikiem JPEG, PNG, WEBP lub HEIC"
+              too_large: "nie może być większe niż %{count} MB"
+  api:
+    not_found: "Nie znaleziono zasobu"
   auth:
     invalid_credentials: "Nieprawidłowy e-mail lub hasło"
     unauthorized: "Sesja wygasła, zaloguj się ponownie"

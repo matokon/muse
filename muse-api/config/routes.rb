@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   post "signup" => "auth#signup"
   post "login" => "auth#login"
   get "me" => "users#me"
+
+  resources :clothing_items, only: [:index, :create, :destroy]
   # Defines the root path route ("/")
   # root "posts#index"
 end

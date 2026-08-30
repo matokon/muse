@@ -1,7 +1,13 @@
 class ApplicationController < ActionController::API
   attr_reader :current_user
 
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+
   private
+
+  def not_found
+    render json: { errors: [I18n.t("api.not_found")] }, status: :not_found
+  end
 
   def authenticate_request
     payload = JsonWebToken.decode(bearer_token)

@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
 
+  has_many :clothing_items
   normalizes :email, with: ->(email) { email.strip.downcase }
 
   validates :email, presence: true,
