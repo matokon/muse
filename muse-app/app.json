@@ -40,7 +40,11 @@
           "photosPermission": "Muse potrzebuje dostępu do zdjęć, żeby dodać ubranie do szafy.",
           "cameraPermission": "Muse potrzebuje aparatu, żeby zrobić zdjęcie ubrania."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
