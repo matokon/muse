@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
+import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
 import { INK } from '@/constants/theme';
 import { saveToken } from '@/lib/token-storage';
@@ -61,26 +62,7 @@ export default function AuthScreen() {
 
   return (
     <View className="flex-1 bg-surface">
-      <View
-        className="border-b-[2.5px] border-ink bg-header-pink px-6 pb-5"
-        style={{ paddingTop: insets.top + 8 }}>
-        <View className="flex-row items-center gap-3">
-          <Pressable
-            className="h-10 w-10 items-center justify-center rounded-full border-[2.5px] border-ink bg-white"
-            onPress={router.back}>
-            <SymbolView
-              name="arrow.backward"
-              size={18}
-              tintColor={INK}
-              weight="semibold"
-              style={{ width: 18, height: 18 }}
-            />
-          </Pressable>
-          <Text className="text-[22px] font-extrabold tracking-tight text-ink">
-            {isLogin ? 'Zaloguj się' : 'Załóż konto'}
-          </Text>
-        </View>
-      </View>
+      <ScreenHeader title={isLogin ? 'Zaloguj się' : 'Załóż konto'} onBack={router.back} />
 
       <ScrollView
         className="flex-1"

@@ -9,6 +9,7 @@ module.exports = {
         muted: '#5B5B6B',
         surface: '#EFE7FC',
         'header-pink': '#F3D3E3',
+        plum: '#5B4A7E',
         'button-pink': '#F2C8DB',
         lavender: '#DCD4F1',
       },
