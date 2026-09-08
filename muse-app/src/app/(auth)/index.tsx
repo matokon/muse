@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
-import { hardShadow } from '@/constants/theme';
+import { MUTED, hardShadow } from '@/constants/theme';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -24,7 +24,12 @@ export default function OnboardingScreen() {
           className="min-h-[180px] flex-1 rounded-2xl border-[2.5px] border-ink bg-lavender p-2.5"
           style={hardShadow(5)}>
           <View className="flex-1 items-center justify-center gap-1.5 rounded-[10px] border-[1.5px] border-dashed border-muted">
-            <Ionicons name="image-outline" size={34} color="#5B5B6B" />
+            <SymbolView
+              name="photo.badge.plus"
+              size={34}
+              tintColor={MUTED}
+              style={{ width: 34, height: 34 }}
+            />
             <Text className="text-[15px] font-semibold text-muted">Przeciągnij swoje zdjęcie</Text>
             <Text className="text-[13px] text-muted">
               or <Text className="underline">browse files</Text>
