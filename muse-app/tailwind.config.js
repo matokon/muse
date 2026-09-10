@@ -10,6 +10,7 @@ module.exports = {
         surface: '#EFE7FC',
         'header-pink': '#F3D3E3',
         plum: '#5B4A7E',
+        accent: '#F7B8D4',
         'button-pink': '#F2C8DB',
         lavender: '#DCD4F1',
       },

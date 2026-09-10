@@ -1,4 +1,5 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import type { SFSymbol } from 'expo-symbols';
 import { Pressable, Text, View } from 'react-native';
@@ -59,7 +60,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       {tabs.slice(0, middle).map(({ route, index }) => renderTab(route, index))}
 
       <View className="mx-2">
-        <ChunkyButton square offset={3} onPress={() => navigation.navigate(ADD_ROUTE)}>
+        <ChunkyButton square offset={3} onPress={() => router.push('/add-item/step-1')}>
           <SymbolView
             name="plus"
             size={26}
