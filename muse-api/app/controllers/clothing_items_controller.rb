@@ -26,7 +26,7 @@ class ClothingItemsController < ApplicationController
   private
 
   def clothing_item_params
-    params.permit(:name, :category, :color, :is_favourite, :photo)
+    params.permit(:name, :category, :note, :is_favourite, :photo)
   end
 
   def item_payload(item)
@@ -34,7 +34,7 @@ class ClothingItemsController < ApplicationController
       id: item.id,
       name: item.name,
       category: item.category,
-      color: item.color,
+      note: item.note,
       is_favourite: item.is_favourite,
       photo_url: item.photo.attached? ? url_for(item.photo) : nil
     }
