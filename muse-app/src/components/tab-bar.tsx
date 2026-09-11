@@ -1,5 +1,5 @@
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { router } from 'expo-router';
+import { router, Tabs } from 'expo-router';
+import type { ComponentProps } from 'react';
 import { SymbolView } from 'expo-symbols';
 import type { SFSymbol } from 'expo-symbols';
 import { Pressable, Text, View } from 'react-native';
@@ -7,6 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
 import { INK, MUTED } from '@/constants/theme';
+
+type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
+type TabRoute = TabBarProps['state']['routes'][number];
 
 const ADD_ROUTE = 'add-item';
 
@@ -17,10 +20,10 @@ const ICONS: Record<string, SFSymbol> = {
   profile: 'person.crop.circle',
 };
 
-export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function TabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
-  function renderTab(route: BottomTabBarProps['state']['routes'][number], index: number) {
+  function renderTab(route: TabRoute, index: number) {
     const { options } = descriptors[route.key];
     const focused = state.index === index;
     const label = options.title ?? route.name;
