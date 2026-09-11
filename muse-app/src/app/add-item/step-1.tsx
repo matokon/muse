@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Linking, Text, View } from 'react-native';
 
@@ -15,6 +16,8 @@ export default function AddItemScreen() {
   const cameraRef = useRef<CameraView>(null);
   const [isReady, setIsReady] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isPicking, setIsPicking] = useState(false);
+  const isBusy = isCapturing || isPicking;
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -33,7 +36,7 @@ export default function AddItemScreen() {
   }, [getPermission]);
 
   async function takePhoto() {
-    if (!isReady || isCapturing) return;
+    if (!isReady || isBusy) return;
 
     setIsCapturing(true);
     try {
@@ -46,6 +49,28 @@ export default function AddItemScreen() {
       console.warn('takePictureAsync failed', error);
     } finally {
       setIsCapturing(false);
+    }
+  }
+
+  async function pickFromLibrary() {
+    if (isBusy) return;
+
+    setIsPicking(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+      });
+
+      const picked = result.canceled ? undefined : result.assets[0];
+
+      if (picked?.uri) {
+        router.push({ pathname: '/add-item/step-2', params: { uri: picked.uri } });
+      }
+    } catch (error) {
+      console.warn('launchImageLibraryAsync failed', error);
+    } finally {
+      setIsPicking(false);
     }
   }
 
@@ -97,12 +122,14 @@ export default function AddItemScreen() {
         </View>
 
         <View className="mt-5 mb-5 gap-4 pb-6">
-          <ChunkyButton onPress={takePhoto} disabled={!isReady || isCapturing}>
+          <ChunkyButton onPress={takePhoto} disabled={!isReady || isBusy}>
             <Text className="text-xl font-bold text-ink">
               {isCapturing ? 'Robię zdjęcie…' : 'Zrób zdjęcie'}
             </Text>
           </ChunkyButton>
-          <Button>Wybierz z galerii</Button>
+          <Button onPress={pickFromLibrary} disabled={isBusy}>
+            Wybierz z galerii
+          </Button>
         </View>
       </View>
     </View>
