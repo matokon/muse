@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState, Linking, Text, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -12,6 +12,9 @@ import { hardShadow } from '@/constants/theme';
 
 export default function AddItemScreen() {
   const [permission, requestPermission, getPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -28,6 +31,23 @@ export default function AddItemScreen() {
 
     return () => sub.remove();
   }, [getPermission]);
+
+  async function takePhoto() {
+    if (!isReady || isCapturing) return;
+
+    setIsCapturing(true);
+    try {
+      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.8 });
+
+      if (photo?.uri) {
+        router.push({ pathname: '/add-item/step-2', params: { uri: photo.uri } });
+      }
+    } catch (error) {
+      console.warn('takePictureAsync failed', error);
+    } finally {
+      setIsCapturing(false);
+    }
+  }
 
   function goBack() {
     return router.canGoBack() ? router.back() : router.replace('/wardrobe');
@@ -46,7 +66,7 @@ export default function AddItemScreen() {
 
         <View className="my-5 flex-1">
           <CameraFrame>
-            {permission?.granted ? <CameraView style={{ flex: 1 }} facing="back"/> : (
+            {permission?.granted ? <CameraView style={{ flex: 1 }} facing="back" ref={cameraRef} onCameraReady={() => setIsReady(true)} /> : (
               <View className="flex-1 items-center justify-center px-8">
                 <Text className="text-center text-[15px] font-semibold text-plum">
                   {permission && !permission.canAskAgain
@@ -72,13 +92,15 @@ export default function AddItemScreen() {
             Połóż ubranie na płaskiej powierzchni
           </Text>
           <Text className="mt-1 text-[14px] leading-5 text-muted">
-            Jasne tło i rozprostowane rękawy — wycięcie wyjdzie czysto.
+            Jasne tło i rozprostowane rękawy - wycięcie wyjdzie czysto.
           </Text>
         </View>
 
         <View className="mt-5 mb-5 gap-4 pb-6">
-          <ChunkyButton>
-            <Text className="text-xl font-bold text-ink">Zrób zdjęcie</Text>
+          <ChunkyButton onPress={takePhoto} disabled={!isReady || isCapturing}>
+            <Text className="text-xl font-bold text-ink">
+              {isCapturing ? 'Robię zdjęcie…' : 'Zrób zdjęcie'}
+            </Text>
           </ChunkyButton>
           <Button>Wybierz z galerii</Button>
         </View>
