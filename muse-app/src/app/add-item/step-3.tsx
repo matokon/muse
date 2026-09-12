@@ -21,7 +21,7 @@ export default function AddItemStep3Screen() {
   const [name, setName] = useState('');
   const [group, setGroup] = useState<Group>(GROUPS[0]);
   const [type, setType] = useState<string>(GROUPS[0].types[0]);
-  const [note, setNote] = useState('');
+  const [favourite, setFavourite] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -39,7 +39,7 @@ export default function AddItemStep3Screen() {
       const form = new FormData();
       form.append('name', name.trim());
       form.append('category', type);
-      form.append('note', note.trim());
+      form.append('is_favourite', String(favourite));
       form.append('photo', new File(uri));
 
       const token = await getToken();
@@ -158,16 +158,22 @@ export default function AddItemStep3Screen() {
           })}
         </View>
 
-        <Text className="mt-5 px-6 text-[15px] font-semibold text-ink">Notatka</Text>
-        <TextInput
-          className="mx-6 mt-2 h-[160px] rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-4 text-[16px] text-ink"
-          placeholder="Dodaj opcjonalną notatkę"
-          placeholderTextColor={PLACEHOLDER}
-          value={note}
-          onChangeText={setNote}
-          multiline
-          textAlignVertical="top"
-        />
+        <View
+          className="mx-6 mt-6 flex-row items-center justify-between rounded-2xl border-[2.5px] border-ink bg-lavender px-4 py-4"
+          style={hardShadow(4)}>
+          <Text className="text-[16px] text-ink">Dodaj do ulubionych</Text>
+
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityState={{ checked: favourite }}
+            hitSlop={8}
+            onPress={() => setFavourite((value) => !value)}
+            className={`h-9 w-16 justify-center rounded-full border-[2.5px] border-ink px-1 ${
+              favourite ? 'items-end bg-accent' : 'items-start bg-white'
+            }`}>
+            <View className="h-6 w-6 rounded-full bg-ink" />
+          </Pressable>
+        </View>
 
         {errors.length > 0 && (
           <View className="mx-6 mt-5 rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-3">
