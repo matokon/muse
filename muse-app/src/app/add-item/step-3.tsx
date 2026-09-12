@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
 import { ScreenHeader } from '@/components/screen-header';
@@ -18,6 +19,7 @@ const PLACEHOLDER = '#5B4A7E';
 
 export default function AddItemStep3Screen() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const [group, setGroup] = useState<Group>(GROUPS[0]);
   const [type, setType] = useState<string>(GROUPS[0].types[0]);
@@ -185,14 +187,15 @@ export default function AddItemStep3Screen() {
           </View>
         )}
 
-        <View className="mt-8 px-6">
-          <ChunkyButton onPress={save} disabled={!uri || !name.trim() || !type || isSaving}>
-            <Text className="text-xl font-bold text-ink">
-              {isSaving ? 'Zapisuję…' : 'Zapisz do szafy'}
-            </Text>
-          </ChunkyButton>
-        </View>
       </ScrollView>
+
+      <View className="px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        <ChunkyButton onPress={save} disabled={!uri || !name.trim() || !type || isSaving}>
+          <Text className="text-xl font-bold text-ink">
+            {isSaving ? 'Zapisuję…' : 'Zapisz do szafy'}
+          </Text>
+        </ChunkyButton>
+      </View>
     </View>
   );
 }
