@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
@@ -20,7 +20,6 @@ type Item = {
   id: number;
   name: string;
   category: string | null;
-  note: string | null;
   is_favourite: boolean;
   photo_url: string | null;
 };
@@ -171,7 +170,8 @@ export default function WardrobeScreen() {
           item === null ? (
             <View className="flex-1" />
           ) : (
-            <View
+            <Pressable
+              onPress={() => router.push(`/item/${item.id}`)}
               className="flex-1 overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
               style={hardShadow(4)}>
               <View className="aspect-square bg-lavender">
@@ -210,7 +210,7 @@ export default function WardrobeScreen() {
                   {item.name}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           )
         }
       />
