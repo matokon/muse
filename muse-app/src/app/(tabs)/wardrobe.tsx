@@ -6,7 +6,7 @@ import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from '
 
 import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
-import { GROUPS, groupOf } from '@/constants/categories';
+import { GROUPS } from '@/constants/categories';
 import { hardShadow, INK } from '@/constants/theme';
 import { getToken } from '@/lib/token-storage';
 
@@ -73,8 +73,12 @@ export default function WardrobeScreen() {
     if (filter === ALL) return true;
     if (filter === FAVOURITES) return item.is_favourite;
 
-    return item.category ? groupOf(item.category)?.label === filter : false;
+    return item.category === filter;
   });
+
+  const usedTypes = GROUPS.flatMap((group) => group.types).filter((type) =>
+    items.some((item) => item.category === type),
+  );
 
   const grid: (Item | null)[] = visible.length % 2 === 1 ? [...visible, null] : visible;
 
@@ -92,7 +96,7 @@ export default function WardrobeScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 8, paddingHorizontal: 24, alignItems: 'center' }}>
-        {[ALL, FAVOURITES, ...GROUPS.map((group) => group.label)].map((label) => {
+        {[ALL, FAVOURITES, ...usedTypes].map((label) => {
           const selected = label === filter;
 
           return (
