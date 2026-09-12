@@ -6,6 +6,12 @@ class ClothingItemsController < ApplicationController
     render json: { items: items.map { |item| item_payload(item) } }
   end
 
+  def show
+    item = current_user.clothing_items.with_attached_photo.find(params[:id])
+
+    render json: { item: item_payload(item) }
+  end
+
   def create
     item = current_user.clothing_items.new(clothing_item_params)
 
@@ -26,7 +32,7 @@ class ClothingItemsController < ApplicationController
   private
 
   def clothing_item_params
-    params.permit(:name, :category, :note, :is_favourite, :photo)
+    params.permit(:name, :category, :is_favourite, :photo)
   end
 
   def item_payload(item)
@@ -34,8 +40,8 @@ class ClothingItemsController < ApplicationController
       id: item.id,
       name: item.name,
       category: item.category,
-      note: item.note,
       is_favourite: item.is_favourite,
+      created_at: item.created_at.iso8601,
       photo_url: item.photo.attached? ? url_for(item.photo) : nil
     }
   end

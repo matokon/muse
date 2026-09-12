@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   post "login" => "auth#login"
   get "me" => "users#me"
 
-  resources :clothing_items, only: [:index, :create, :destroy]
+  resources :clothing_items, only: [:index, :show, :create, :destroy]
   # Defines the root path route ("/")
   # root "posts#index"
 end
