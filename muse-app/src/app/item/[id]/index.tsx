@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Image as RNImage,
@@ -24,7 +24,7 @@ const MONTHS = [
   'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia',
 ];
 
-const HAMSTER = require('../../../assets/images/hamster.png');
+const HAMSTER = require('../../../../assets/images/hamster.png');
 
 type Item = {
   id: number;
@@ -73,9 +73,11 @@ export default function ItemScreen() {
     }
   }, [id]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   function goBack() {
     return router.canGoBack() ? router.back() : router.replace('/wardrobe');
@@ -165,7 +167,7 @@ export default function ItemScreen() {
       </ScrollView>
 
       <View className="gap-4 px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
-        <ChunkyButton disabled>
+        <ChunkyButton onPress={() => router.push(`/item/${item.id}/edit`)}>
           <Text className="text-xl font-bold text-ink">Edytuj przedmiot</Text>
         </ChunkyButton>
         <Button onPress={() => setConfirming(true)} disabled={deleting}>

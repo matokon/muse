@@ -22,6 +22,16 @@ class ClothingItemsController < ApplicationController
     end
   end
 
+  def update
+    item = current_user.clothing_items.find(params[:id])
+
+    if item.update(clothing_item_params)
+      render json: { item: item_payload(item) }
+    else
+      render json: { errors: item.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     item = current_user.clothing_items.find(params[:id])
     item.destroy
