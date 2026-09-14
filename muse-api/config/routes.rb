@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   get "me" => "users#me"
 
   resources :clothing_items, only: [:index, :show, :create, :update, :destroy]
-  # Defines the root path route ("/")
-  # root "posts#index"
+
+  get "outfits/categories" => "outfits#categories"
+
 end

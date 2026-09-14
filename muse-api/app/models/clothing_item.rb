@@ -5,7 +5,9 @@ class ClothingItem < ApplicationRecord
   has_one_attached :photo
 
   belongs_to :user
-
+  has_many :outfit_clothing_items
+  has_many :outfits, through: :outfit_clothing_items
+  
   validates :name, presence: true
 
   validate :photo_within_limits

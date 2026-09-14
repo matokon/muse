@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_12_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_094839) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_12_090000) do
     t.index ["user_id"], name: "index_clothing_items_on_user_id"
   end
 
+  create_table "outfit_clothing_items", force: :cascade do |t|
+    t.bigint "clothing_item_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "outfit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["clothing_item_id"], name: "index_outfit_clothing_items_on_clothing_item_id"
+    t.index ["outfit_id", "clothing_item_id"], name: "index_outfit_clothing_items_on_outfit_id_and_clothing_item_id", unique: true
+    t.index ["outfit_id"], name: "index_outfit_clothing_items_on_outfit_id"
+  end
+
+  create_table "outfits", force: :cascade do |t|
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_outfits_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email"
@@ -64,4 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_12_090000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "clothing_items", "users"
+  add_foreign_key "outfit_clothing_items", "clothing_items"
+  add_foreign_key "outfit_clothing_items", "outfits"
+  add_foreign_key "outfits", "users"
 end
