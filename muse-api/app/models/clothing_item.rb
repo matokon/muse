@@ -7,10 +7,15 @@ class ClothingItem < ApplicationRecord
   belongs_to :user
   has_many :outfit_clothing_items
   has_many :outfits, through: :outfit_clothing_items
-  
+
   validates :name, presence: true
 
   validate :photo_within_limits
+
+  def photo_url
+    return nil unless photo.attached?
+    Rails.application.routes.url_helpers.rails_blob_url(photo, only_path: true)
+  end
 
   private
 

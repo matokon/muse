@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_094839) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_16_123253) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_094839) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "categories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "name"], name: "index_categories_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_categories_on_user_id"
+  end
+
   create_table "clothing_items", force: :cascade do |t|
     t.string "category"
     t.datetime "created_at", null: false
@@ -63,11 +72,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_094839) do
   end
 
   create_table "outfits", force: :cascade do |t|
-    t.string "category"
+    t.bigint "category_id"
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["category_id"], name: "index_outfits_on_category_id"
     t.index ["user_id"], name: "index_outfits_on_user_id"
   end
 
@@ -82,8 +92,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_094839) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "categories", "users"
   add_foreign_key "clothing_items", "users"
   add_foreign_key "outfit_clothing_items", "clothing_items"
   add_foreign_key "outfit_clothing_items", "outfits"
+  add_foreign_key "outfits", "categories"
   add_foreign_key "outfits", "users"
 end
