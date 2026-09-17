@@ -182,7 +182,7 @@ export default function ItemScreen() {
         statusBarTranslucent
         onRequestClose={() => setConfirming(false)}>
         <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(20, 18, 26, 0.55)' }}>
-          <View className="rounded-t-[28px] border-t-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
+          <View className="rounded-t-[28px] border-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
             <Text className="text-[22px] font-extrabold tracking-tight text-ink">
               Usunąć z szafy?
             </Text>
