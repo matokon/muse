@@ -1,5 +1,5 @@
 class CategoriesController < ApplicationController
-  before_action :set_category, only: [:update, :destroy]
+  before_action :set_category, only: [:destroy]
 
   def index
     categories = current_user.categories.left_joins(:outfits).group(:id).select('categories.*, COUNT(outfits.id) AS outfits_count')
