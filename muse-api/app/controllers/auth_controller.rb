@@ -1,4 +1,6 @@
 class AuthController < ApplicationController
+  skip_before_action :authenticate_request, only: [:signup, :login]
+  
   def signup
     user = User.new(signup_params)
     if user.save
