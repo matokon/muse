@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -156,7 +156,7 @@ export default function OutfitsScreen() {
             </View>
           ) : (
             <View className="items-center px-8 pt-10">
-              <Text className="text-center text-[15px] font-semibold text-plum">
+              <Text className="text-center text-[15px] pb-5 font-semibold text-plum">
                 {error ?? 'Nie masz jeszcze żadnych kategorii'}
               </Text>
             </View>
@@ -182,7 +182,13 @@ export default function OutfitsScreen() {
                   <Ionicons name="trash-outline" size={24} color={INK} />
                 </Pressable>
               )}>
-              <CategoryCard>
+              <CategoryCard
+                  onPress={() =>
+                  router.push({
+                  pathname: '/category/[categoryId]',
+                  params: { categoryId: String(item.id), categoryName: item.name },
+                })
+              }>
                 <View className="flex-row items-center gap-3 px-4 py-7">
                   <View className="h-12 w-12 rounded-lg border-[2.5px] border-ink bg-lavender" />
                   <View className="flex-1">
