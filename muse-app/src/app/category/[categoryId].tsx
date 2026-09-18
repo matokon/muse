@@ -114,7 +114,7 @@ export default function CategoryIdScreen() {
         <ChunkyButton
           onPress={() =>
             router.push({
-              pathname: '/add-outfit/step-1',
+              pathname: '/add-outfit',
               params: { categoryId, categoryName },
             })
           }>
