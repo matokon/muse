@@ -38,14 +38,14 @@ export function CategoryCard({ children, onPress, offset = 4 }: Props) {
         press.value = withTiming(0, { duration: PRESS_OUT_MS });
       }}
       onPress={onPress}>
-      <View>
+      <View style={{ paddingRight: offset, paddingBottom: offset }}>
         <View
           style={{
             position: 'absolute',
             left: offset,
             top: offset,
-            right: -offset,
-            bottom: -offset,
+            right: 0,
+            bottom: 0,
             backgroundColor: INK,
             borderRadius: RADIUS,
           }}

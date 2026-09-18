@@ -1,11 +1,8 @@
-import { CategoryCard } from '@/components/category-card';
-import { ChunkyButton } from '@/components/chunky-button';
-import { ScreenHeader } from '@/components/screen-header';
-import { API_URL } from '@/config';
-import { getToken } from '@/lib/token-storage';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -15,6 +12,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+
+import { Button } from '@/components/button';
+import { CategoryCard } from '@/components/category-card';
+import { ChunkyButton } from '@/components/chunky-button';
+import { ScreenHeader } from '@/components/screen-header';
+import { API_URL } from '@/config';
+import { INK } from '@/constants/theme';
+import { getToken } from '@/lib/token-storage';
 
 type OutfitCategory = {
   id: number;
@@ -44,6 +50,7 @@ export default function OutfitsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [categoryName, setCategoryName] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<OutfitCategory | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -74,7 +81,7 @@ export default function OutfitsScreen() {
     }, [load]),
   );
 
-  async function create(name:string) {
+  async function create(name: string) {
     setError(null);
     try {
       const token = await getToken();
@@ -86,7 +93,7 @@ export default function OutfitsScreen() {
         },
         body: JSON.stringify({ category: { name } }),
       });
-      
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -100,6 +107,31 @@ export default function OutfitsScreen() {
     } catch (err) {
       console.error('[outfits] create', err);
       setError('Brak połączenia z serwerem');
+    }
+  }
+
+  async function remove(catid: number) {
+    setError(null);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/categories/${catid}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 204) {
+        setPendingDelete(null);
+        load();
+        return;
+      }
+
+      const data = await res.json();
+      setError(data.errors?.[0] ?? 'Nie udało się usunąć kategorii');
+      setPendingDelete(null);
+    } catch (err) {
+      console.error('[outfits] remove', err);
+      setError('Brak połączenia z serwerem');
+      setPendingDelete(null);
     }
   }
 
@@ -117,6 +149,19 @@ export default function OutfitsScreen() {
         data={categories}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ gap: 12, paddingTop: 16, paddingBottom: 24 }}
+        ListEmptyComponent={
+          loading ? (
+            <View className="items-center pt-10">
+              <ActivityIndicator color={INK} />
+            </View>
+          ) : (
+            <View className="items-center px-8 pt-10">
+              <Text className="text-center text-[15px] font-semibold text-plum">
+                {error ?? 'Nie masz jeszcze żadnych kategorii'}
+              </Text>
+            </View>
+          )
+        }
         ListFooterComponent={
           <View className="mx-6 mt-3">
             <Pressable
@@ -128,18 +173,28 @@ export default function OutfitsScreen() {
         }
         renderItem={({ item }) => (
           <View className="mx-6">
-            <CategoryCard>
-              <View className="flex-row items-center gap-3 px-4 py-7">
-                <View className="h-12 w-12 rounded-lg border-[2.5px] border-ink bg-lavender" />
-                <View className="flex-1">
-                  <Text className="text-[15px] font-bold text-ink">{item.name}</Text>
-                  <Text className="text-[13px] text-muted">
-                    {outfitsLabel(item.outfits_count)}
-                  </Text>
+            <ReanimatedSwipeable
+              containerStyle={{ overflow: 'visible' }}
+              renderLeftActions={() => (
+                <Pressable
+                  onPress={() => setPendingDelete(item)}
+                  className="mr-3 h-full w-20 items-center justify-center rounded-2xl border-[2.5px] border-ink bg-white">
+                  <Ionicons name="trash-outline" size={24} color={INK} />
+                </Pressable>
+              )}>
+              <CategoryCard>
+                <View className="flex-row items-center gap-3 px-4 py-7">
+                  <View className="h-12 w-12 rounded-lg border-[2.5px] border-ink bg-lavender" />
+                  <View className="flex-1">
+                    <Text className="text-[15px] font-bold text-ink">{item.name}</Text>
+                    <Text className="text-[13px] text-muted">
+                      {outfitsLabel(item.outfits_count)}
+                    </Text>
+                  </View>
+                  <Text className="text-[18px] text-ink">→</Text>
                 </View>
-                <Text className="text-[18px] text-ink">→</Text>
-              </View>
-            </CategoryCard>
+              </CategoryCard>
+            </ReanimatedSwipeable>
           </View>
         )}
       />
@@ -188,6 +243,35 @@ export default function OutfitsScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal
+        visible={pendingDelete !== null}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setPendingDelete(null)}>
+        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(20, 18, 26, 0.55)' }}>
+          <View className="rounded-t-[28px] border-t-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
+            <Text className="text-[22px] font-extrabold tracking-tight text-ink">
+              Usunąć kategorię?
+            </Text>
+            <Text className="mt-3 text-[15px] leading-6 text-muted">
+              „{pendingDelete?.name}” zostanie usunięta. Tego nie da się cofnąć.
+            </Text>
+
+            <View className="mt-7 flex-row gap-4">
+              <View className="flex-1">
+                <Button onPress={() => setPendingDelete(null)}>Zostaw</Button>
+              </View>
+              <View className="flex-1">
+                <ChunkyButton onPress={() => remove(pendingDelete!.id)}>
+                  <Text className="text-base font-bold text-ink">Usuń</Text>
+                </ChunkyButton>
+              </View>
+            </View>
+          </View>
+        </View>
       </Modal>
     </View>
   );
