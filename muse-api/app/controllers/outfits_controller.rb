@@ -51,7 +51,7 @@ class OutfitsController < ApplicationController
   end
 
   def outfit_params
-    attrs = params.require(:outfit).permit(:name, :category_id, :clothing_item_ids => [])
+    attrs = params.require(:outfit).permit(:name, :category_id, :photo, :clothing_item_ids => [])
 
     if attrs.key?(:category_id)
       attrs[:category_id] = safe_category_id(attrs[:category_id])
