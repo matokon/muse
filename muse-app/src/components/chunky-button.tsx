@@ -10,7 +10,7 @@ const RADIUS = 15;
 const PRESS_IN_MS = 60;
 const PRESS_OUT_MS = 100;
 
-type Variant = 'primary' | 'secondary' | 'accent';
+type Variant = 'primary' | 'secondary' | 'accent' | 'sadaccent';
 
 type Props = {
   children: ReactNode;
@@ -25,6 +25,7 @@ const faceColor: Record<Variant, string> = {
   primary: '#F2C8DB',
   secondary: '#FFFFFF',
   accent: '#D5C4FA',
+  sadaccent: '#b6abc9'
 };
 
 export function ChunkyButton({
