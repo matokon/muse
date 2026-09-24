@@ -1,4 +1,6 @@
+import { File } from 'expo-file-system';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -11,6 +13,7 @@ import {
 } from 'react-native';
 
 import { ChunkyButton } from '@/components/chunky-button';
+import { PhotoButton } from '@/components/photo-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
 import { hardShadow, INK } from '@/constants/theme';
@@ -34,12 +37,13 @@ const PHOTO_OPTIONS: {
   variant: 'primary' | 'secondary' | 'accent';
 }[] = [
   { key: 'none', title: 'Bez zdjęcia', subtitle: 'sam zestaw', variant: 'primary' },
-  { key: 'gallery', title: 'Własne zdjęcie', subtitle: 'wybierz z galerii', variant: 'accent' },
-  { key: 'camera', title: 'Własne zdjęcie', subtitle: 'zrób foto', variant: 'primary' },
+  { key: 'gallery', title: 'Wybierz zdjęcie z galerii', subtitle: 'z biblioteki', variant: 'accent' },
+  { key: 'camera', title: 'Zrób zdjęcie', subtitle: 'aparat', variant: 'primary' },
 ];
 
 const MODAL_TILE = 96;
 const PREVIEW_SLOTS = 4;
+const MAX_PHOTOS = 5;
 
 export default function AddOutfitScreen() {
   const { categoryId, categoryName } = useLocalSearchParams<{
@@ -52,9 +56,11 @@ export default function AddOutfitScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [photoOption, setPhotoOption] = useState<PhotoOption>('none');
+  const [photos, setPhotos] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const visibleItems = selectedType
     ? items.filter((item) => item.category === selectedType)
@@ -76,13 +82,6 @@ export default function AddOutfitScreen() {
     remainder === 0
       ? selectedItems
       : [...selectedItems, ...Array(3 - remainder).fill(null)];
-
-  const saveLabel =
-    photoOption === 'camera'
-      ? 'Zapisz i zrób zdjęcie'
-      : photoOption === 'gallery'
-        ? 'Zapisz i wybierz zdjęcie'
-        : 'Zapisz outfit';
 
   const load = useCallback(async () => {
     setError(null);
@@ -124,6 +123,100 @@ export default function AddOutfitScreen() {
 
   function isSelected(item: Item) {
     return selectedItems.some((i) => i.id === item.id);
+  }
+
+  async function pickFromGallery() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+      allowsMultipleSelection: true,
+      selectionLimit: MAX_PHOTOS,
+    });
+
+    if (!result.canceled) {
+      setPhotos((current) =>
+        [...current, ...result.assets.map((a) => a.uri)].slice(0, MAX_PHOTOS),
+      );
+      setPhotoOption('gallery');
+    }
+  }
+
+  async function takePhoto() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.7,
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+
+    if (!result.canceled) {
+      setPhotos((current) =>
+        [...current, result.assets[0].uri].slice(0, MAX_PHOTOS),
+      );
+      setPhotoOption('camera');
+    }
+  }
+
+  function handlePhotoOption(key: PhotoOption) {
+    if (key === 'none') {
+      setPhotos([]);
+      setPhotoOption('none');
+      return;
+    }
+    if (key === 'gallery') {
+      pickFromGallery();
+      return;
+    }
+    if (key === 'camera') {
+      takePhoto();
+      return;
+    }
+  }
+
+  async function save() {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const token = await getToken();
+      const form = new FormData();
+
+      if (categoryId) {
+        form.append('outfit[category_id]', String(categoryId));
+      }
+
+      selectedItems.forEach((item) => {
+        form.append('outfit[clothing_item_ids][]', String(item.id));
+      });
+
+      photos.forEach((uri) => {
+        form.append('outfit[photos][]', new File(uri));
+      });
+
+      const res = await fetch(`${API_URL}/outfits`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.errors?.[0] ?? 'Nie udało się zapisać outfitu');
+        return;
+      }
+
+      router.back();
+    } catch (err) {
+      console.error('[add-outfit] save', err);
+      setError('Brak połączenia z serwerem');
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -229,29 +322,39 @@ export default function AddOutfitScreen() {
 
         <View className="mt-3 flex-row gap-3 px-6">
           {PHOTO_OPTIONS.map((opt) => {
-            const selected = opt.key === photoOption;
+            const selected =
+              opt.key === photoOption && (opt.key === 'none' || photos.length > 0);
             return (
               <View key={opt.key} className="flex-1">
-                <ChunkyButton
-                  variant={selected ? opt.variant : 'secondary'}
-                  onPress={() => setPhotoOption(opt.key)}>
+                <PhotoButton
+                  variant={opt.variant}
+                  selected={selected}
+                  onPress={() => handlePhotoOption(opt.key)}>
                   <View className="min-h-[76px] items-center justify-center">
-                    <Text className="text-center text-[14px] font-bold text-ink">
+                    <Text className="text-center text-[13px] font-bold text-ink">
                       {opt.title}
                     </Text>
                     <Text className="mt-1 text-center text-[11px] text-muted">
                       {opt.subtitle}
                     </Text>
                   </View>
-                </ChunkyButton>
+                </PhotoButton>
               </View>
             );
           })}
         </View>
 
+        {error && (
+          <Text className="mt-4 px-6 text-center text-[14px] font-semibold text-plum">
+            {error}
+          </Text>
+        )}
+
         <View className="mt-8 px-6 pb-6">
-          <ChunkyButton onPress={() => {}}>
-            <Text className="text-lg font-bold text-ink">{saveLabel}</Text>
+          <ChunkyButton onPress={save} disabled={isSaving}>
+            <Text className="text-lg font-bold text-ink">
+              {isSaving ? 'Zapisuję…' : 'Zapisz outfit'}
+            </Text>
           </ChunkyButton>
         </View>
       </ScrollView>
