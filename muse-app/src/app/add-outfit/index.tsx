@@ -8,6 +8,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
 import { hardShadow, INK } from '@/constants/theme';
 import { getToken } from '@/lib/token-storage';
+import { Modal } from 'react-native';
 
 type Item = {
   id: number;
@@ -41,6 +42,7 @@ export default function AddOutfitScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [photoOption, setPhotoOption] = useState<PhotoOption>('none');
 
   const visibleItems = selectedType
@@ -134,18 +136,16 @@ export default function AddOutfitScreen() {
         style={{ flexGrow: 0 }}
         contentContainerStyle={{ gap: 10, paddingHorizontal: 24, paddingTop: 15 }}>
         {visibleItems.map((item) => (
-          <View
+          <Pressable
             key={item.id}
+            onLongPress={() => item.photo_url && setPreviewPhoto(item.photo_url)}
+            delayLongPress={300}
             className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-lavender"
             style={{ width: 120, height: 120 }}>
             {item.photo_url && (
-              <Image
-                source={{ uri: item.photo_url }}
-                style={{ flex: 1 }}
-                contentFit="cover"
-              />
+              <Image source={{ uri: item.photo_url }} style={{ flex: 1 }} contentFit="cover" />
             )}
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
 
@@ -177,6 +177,29 @@ export default function AddOutfitScreen() {
           <Text className="text-lg font-bold text-ink">{saveLabel}</Text>
         </ChunkyButton>
       </View>
+      <Modal
+        visible={previewPhoto !== null}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setPreviewPhoto(null)}>
+        <Pressable
+          onPress={() => setPreviewPhoto(null)}
+          className="flex-1 items-center justify-center"
+          style={{ backgroundColor: 'rgba(20, 18, 26, 0.9)' }}>
+          {previewPhoto && (
+            <View
+              className="items-center justify-center overflow-hidden rounded-3xl border-[2.5px] border-white bg-black/40"
+              style={{ width: '85%', height: '80%' }}>
+              <Image
+                source={{ uri: previewPhoto }}
+                style={{ width: '100%', height: '100%' }}
+                contentFit="contain"
+              />
+            </View>
+          )}
+        </Pressable>
+      </Modal>
     </View>
   );
 }
