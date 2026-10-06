@@ -19,7 +19,6 @@ const HAMSTER = require('../../../assets/images/hamster.png');
 
 type Outfit = {
   id: number;
-  name: string;
   category: { id: number; name: string } | null;
   created_at: string;
   photo_urls: string[];
@@ -109,12 +108,7 @@ export default function CategoryIdScreen() {
                 )}
               </View>
 
-              <View className="flex-row items-center justify-between border-t-[2.5px] border-ink px-4 py-3">
-                <Text
-                  numberOfLines={1}
-                  className="flex-1 text-[15px] font-bold text-ink">
-                  {item.name ?? 'Bez nazwy'}
-                </Text>
+              <View className="flex-row justify-end border-t-[2.5px] border-ink px-4 py-3">
                 <Text className="ml-3 text-[13px] text-muted">
                   {item.photo_urls.length} 📷
                 </Text>
