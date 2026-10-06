@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
@@ -11,7 +12,7 @@ import {
 import { ChunkyButton } from '@/components/chunky-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
-import { INK } from '@/constants/theme';
+import { hardShadow, INK } from '@/constants/theme';
 import { getToken } from '@/lib/token-storage';
 
 const HAMSTER = require('../../../assets/images/hamster.png');
@@ -21,7 +22,16 @@ type Outfit = {
   name: string;
   category: { id: number; name: string } | null;
   created_at: string;
+  photo_urls: string[];
 };
+
+function imageUrl(url: string) {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  return `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+}
 
 function outfitsLabel(count: number) {
   if (count === 1) return '1 outfit';
@@ -85,8 +95,31 @@ export default function CategoryIdScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ gap: 12, paddingTop: 16, paddingBottom: 120 }}
         renderItem={({ item }) => (
-          <View className="mx-6 rounded-2xl border-[2.5px] border-ink bg-white px-4 py-5">
-            <Text className="text-[15px] font-bold text-ink">{item.name}</Text>
+          <View className="mx-6">
+            <View
+              className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
+              style={hardShadow(4)}>
+              <View className="aspect-square bg-lavender">
+                {item.photo_urls.length > 0 && (
+                  <Image
+                    source={{ uri: imageUrl(item.photo_urls[0]) }}
+                    style={{ flex: 1 }}
+                    contentFit="cover"
+                  />
+                )}
+              </View>
+
+              <View className="flex-row items-center justify-between border-t-[2.5px] border-ink px-4 py-3">
+                <Text
+                  numberOfLines={1}
+                  className="flex-1 text-[15px] font-bold text-ink">
+                  {item.name ?? 'Bez nazwy'}
+                </Text>
+                <Text className="ml-3 text-[13px] text-muted">
+                  {item.photo_urls.length} 📷
+                </Text>
+              </View>
+            </View>
           </View>
         )}
         ListEmptyComponent={
