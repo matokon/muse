@@ -4,12 +4,14 @@ class OutfitsController < ApplicationController
   def index
     outfits = current_user.outfits.order(created_at: :desc)
     outfits = outfits.where(category_id: params[:category_id]) if params[:category_id].present?
-    render json: { outfits: outfits }
+    render json: {
+      outfits: outfits.map { |outfit| OutfitSerializer.new(outfit).serializable_hash }
+    }
   end
 
   def show
     render json: {
-      outfit: @outfit,
+      outfit: OutfitSerializer.new(@outfit).serializable_hash,
       clothing_items: @outfit.clothing_items.as_json(
         only: [:id, :name],
         methods: [:photo_url]
@@ -21,7 +23,9 @@ class OutfitsController < ApplicationController
     outfit = current_user.outfits.new(outfit_params)
 
     if outfit.save
-      render json: { outfit: outfit }, status: :created
+      render json: {
+        outfit: OutfitSerializer.new(outfit).serializable_hash
+      }, status: :created
     else
       render json: { errors: outfit.errors.full_messages }, status: :unprocessable_entity
     end
@@ -29,7 +33,9 @@ class OutfitsController < ApplicationController
 
   def update
     if @outfit.update(outfit_params)
-      render json: { outfit: @outfit }
+      render json: {
+        outfit: OutfitSerializer.new(@outfit).serializable_hash
+      }
     else
       render json: { errors: @outfit.errors.full_messages }, status: :unprocessable_entity
     end

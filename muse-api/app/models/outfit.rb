@@ -13,15 +13,6 @@ class Outfit < ApplicationRecord
   validate :photos_count
   validate :photos_within_limits
 
-  def as_json(options = {})
-    super(options)
-      .except('category_id')
-      .merge(
-        'category' => category&.as_json(only: [:id, :name]),
-        'photo_urls' => photo_urls
-      )
-  end
-
   def photo_urls
     return [] unless photos.attached?
     photos.map do |p|
