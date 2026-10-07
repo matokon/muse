@@ -1,14 +1,42 @@
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
 import { MUTED, hardShadow } from '@/constants/theme';
+import { getToken } from '@/lib/token-storage';
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    getToken()
+      .then((token) => {
+        if (active && token) {
+          router.replace('/wardrobe');
+        }
+      })
+      .catch((error) => {
+        console.error('[auth] session check', error);
+      })
+      .finally(() => {
+        if (active) setCheckingSession(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [router]);
+
+  if (checkingSession) {
+    return <View className="flex-1 bg-surface" />;
+  }
 
   return (
     <View className="flex-1 bg-surface">

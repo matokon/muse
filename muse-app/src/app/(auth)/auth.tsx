@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,7 +8,7 @@ import { ChunkyButton } from '@/components/chunky-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
 import { INK } from '@/constants/theme';
-import { saveToken } from '@/lib/token-storage';
+import { getToken, saveToken } from '@/lib/token-storage';
 
 type Mode = 'login' | 'signup';
 
@@ -25,7 +25,33 @@ export default function AuthScreen() {
   const [form, setForm] = useState({ email: '', password: '', name: '' });
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const isLogin = mode === 'login';
+
+  useEffect(() => {
+    let active = true;
+
+    getToken()
+      .then((token) => {
+        if (active && token) {
+          router.replace('/wardrobe');
+        }
+      })
+      .catch((error) => {
+        console.error('[auth] session check', error);
+      })
+      .finally(() => {
+        if (active) setCheckingSession(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (checkingSession) {
+    return <View className="flex-1 bg-surface" />;
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
