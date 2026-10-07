@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -51,6 +52,19 @@ export default function OutfitsScreen() {
   const [confirming, setConfirming] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [pendingDelete, setPendingDelete] = useState<OutfitCategory | null>(null);
+  const categoryModalY = useRef(new Animated.Value(-500)).current;
+
+  useEffect(() => {
+    if (!confirming) return;
+
+    categoryModalY.setValue(-300);
+    Animated.spring(categoryModalY, {
+      toValue: 0,
+      useNativeDriver: true,
+      damping: 18,
+      stiffness: 120,
+    }).start();
+  }, [categoryModalY, confirming]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -208,14 +222,16 @@ export default function OutfitsScreen() {
       <Modal
         visible={confirming}
         transparent
-        animationType="fade"
+        animationType="none"
         statusBarTranslucent
         onRequestClose={() => setConfirming(false)}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className="flex-1 justify-end"
+          className="flex-1 items-center justify-center px-6"
           style={{ backgroundColor: 'rgba(20, 18, 26, 0.55)' }}>
-          <View className="rounded-t-[28px] border-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
+          <Animated.View
+            className="w-full rounded-[28px] border-[2.5px] border-ink bg-surface px-6 pb-7 pt-7"
+            style={{ transform: [{ translateY: categoryModalY }] }}>
             <View className="flex-row items-center justify-between">
               <Text className="text-[22px] font-extrabold tracking-tight text-ink">
                 Nowa kategoria
@@ -247,7 +263,7 @@ export default function OutfitsScreen() {
                 <Text className="text-base font-bold text-ink">Utwórz kategorię</Text>
               </ChunkyButton>
             </View>
-          </View>
+          </Animated.View>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -258,7 +274,7 @@ export default function OutfitsScreen() {
         statusBarTranslucent
         onRequestClose={() => setPendingDelete(null)}>
         <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(20, 18, 26, 0.55)' }}>
-          <View className="rounded-t-[28px] border-t-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
+          <View className="rounded-t-[28px] border-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
             <Text className="text-[22px] font-extrabold tracking-tight text-ink">
               Usunąć kategorię?
             </Text>
