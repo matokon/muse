@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   Image as RNImage,
   Text,
   View,
@@ -101,42 +102,50 @@ export default function CategoryIdScreen() {
         columnWrapperStyle={{ gap: 12 }}
         contentContainerStyle={{ gap: 12, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 120 }}
         renderItem={({ item }) => (
-          <View style={{ width: cardWidth }}>
-            <View
-              className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
-              style={hardShadow(4)}>
-              <View className="aspect-square bg-lavender">
-                {item.photo_urls[0] ? (
-                  <Image
-                    source={{ uri: imageUrl(item.photo_urls[0]) }}
-                    style={{ flex: 1 }}
-                    contentFit="cover"
-                  />
-                ) : (
-                  <View className="flex-1 items-center justify-center">
-                    <View>
-                      <Ionicons name="camera-outline" size={55} color="#5B4A7E" />
-                      <View
-                        className="absolute -left-2 -right-2 top-[26px]"
-                        style={{
-                          height: 3,
-                          backgroundColor: '#5B4A7E',
-                          transform: [{ rotate: '-40deg' }],
-                        }}
-                      />
+          <Pressable
+          onPress={() =>
+            router.push({
+              pathname: '/outfit/[outfitId]',
+              params: { outfitId: String(item.id) },
+            })
+          }>
+            <View style={{ width: cardWidth }}>
+              <View
+                className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
+                style={hardShadow(4)}>
+                <View className="aspect-square bg-lavender">
+                  {item.photo_urls[0] ? (
+                    <Image
+                      source={{ uri: imageUrl(item.photo_urls[0]) }}
+                      style={{ flex: 1 }}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View className="flex-1 items-center justify-center">
+                      <View>
+                        <Ionicons name="camera-outline" size={55} color="#5B4A7E" />
+                        <View
+                          className="absolute -left-2 -right-2 top-[26px]"
+                          style={{
+                            height: 3,
+                            backgroundColor: '#5B4A7E',
+                            transform: [{ rotate: '-40deg' }],
+                          }}
+                        />
+                      </View>
                     </View>
-                  </View>
-                )}
-              </View>
+                  )}
+                </View>
 
-              <View className="border-t-[2.5px] border-ink px-3 py-2">
-                <Text className="text-[13px] font-semibold text-plum">
-                  {item.clothing_items_count}{' '}
-                  {item.clothing_items_count === 1 ? 'przedmiot' : 'przedmiotów'}
-                </Text>
+                <View className="border-t-[2.5px] border-ink px-3 py-2">
+                  <Text className="text-[13px] font-semibold text-plum">
+                    {item.clothing_items_count}{' '}
+                    {item.clothing_items_count === 1 ? 'przedmiot' : 'przedmiotów'}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          </Pressable>
         )}
         ListEmptyComponent={
           loading ? (
