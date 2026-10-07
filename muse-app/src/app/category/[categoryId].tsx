@@ -8,6 +8,7 @@ import {
   Image as RNImage,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { ChunkyButton } from '@/components/chunky-button';
@@ -53,6 +54,8 @@ export default function CategoryIdScreen() {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { width } = useWindowDimensions();
+  const cardWidth = (width - 48 - 12) / 2;
 
   const load = useCallback(async () => {
     setError(null);
@@ -98,7 +101,7 @@ export default function CategoryIdScreen() {
         columnWrapperStyle={{ gap: 12 }}
         contentContainerStyle={{ gap: 12, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 120 }}
         renderItem={({ item }) => (
-          <View className="min-w-0 flex-1">
+          <View style={{ width: cardWidth }}>
             <View
               className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
               style={hardShadow(4)}>
