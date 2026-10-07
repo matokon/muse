@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,6 +23,7 @@ type Outfit = {
   category: { id: number; name: string } | null;
   created_at: string;
   photo_urls: string[];
+  clothing_items_count: number;
 };
 
 function imageUrl(url: string) {
@@ -91,26 +93,43 @@ export default function CategoryIdScreen() {
 
       <FlatList
         data={outfits}
+        numColumns={2}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ gap: 12, paddingTop: 16, paddingBottom: 120 }}
+        columnWrapperStyle={{ gap: 12 }}
+        contentContainerStyle={{ gap: 12, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 120 }}
         renderItem={({ item }) => (
-          <View className="mx-6">
+          <View className="min-w-0 flex-1">
             <View
               className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-white"
               style={hardShadow(4)}>
               <View className="aspect-square bg-lavender">
-                {item.photo_urls.length > 0 && (
+                {item.photo_urls[0] ? (
                   <Image
                     source={{ uri: imageUrl(item.photo_urls[0]) }}
                     style={{ flex: 1 }}
                     contentFit="cover"
                   />
+                ) : (
+                  <View className="flex-1 items-center justify-center">
+                    <View>
+                      <Ionicons name="camera-outline" size={55} color="#5B4A7E" />
+                      <View
+                        className="absolute -left-2 -right-2 top-[26px]"
+                        style={{
+                          height: 3,
+                          backgroundColor: '#5B4A7E',
+                          transform: [{ rotate: '-40deg' }],
+                        }}
+                      />
+                    </View>
+                  </View>
                 )}
               </View>
 
-              <View className="flex-row justify-end border-t-[2.5px] border-ink px-4 py-3">
-                <Text className="ml-3 text-[13px] text-muted">
-                  {item.photo_urls.length} 📷
+              <View className="border-t-[2.5px] border-ink px-3 py-2">
+                <Text className="text-[13px] font-semibold text-plum">
+                  {item.clothing_items_count}{' '}
+                  {item.clothing_items_count === 1 ? 'przedmiot' : 'przedmiotów'}
                 </Text>
               </View>
             </View>
