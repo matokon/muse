@@ -127,7 +127,7 @@ export default function AddItemScreen() {
               {isCapturing ? 'Robię zdjęcie…' : 'Zrób zdjęcie'}
             </Text>
           </ChunkyButton>
-          <Button onPress={pickFromLibrary} disabled={isBusy}>
+          <Button onPress={pickFromLibrary} disabled={isBusy} color="bg-white">
             Wybierz z galerii
           </Button>
         </View>

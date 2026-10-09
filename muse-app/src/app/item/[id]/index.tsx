@@ -170,7 +170,7 @@ export default function ItemScreen() {
         <ChunkyButton onPress={() => router.push(`/item/${item.id}/edit`)}>
           <Text className="text-xl font-bold text-ink">Edytuj przedmiot</Text>
         </ChunkyButton>
-        <Button onPress={() => setConfirming(true)} disabled={deleting}>
+        <Button onPress={() => setConfirming(true)} disabled={deleting} color='bg-white'>
           Usuń przedmiot
         </Button>
       </View>
