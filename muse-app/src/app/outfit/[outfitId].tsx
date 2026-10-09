@@ -14,6 +14,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
 import { hardShadow, INK } from '@/constants/theme';
 import { getToken } from '@/lib/token-storage';
+import { Button } from '@/components/button';
 
 type Outfit = {
   id: number;
@@ -236,22 +237,25 @@ export default function OutfitScreen() {
         animationType="fade"
         statusBarTranslucent
         onRequestClose={() => setSelectedPhoto(null)}>
-        <Pressable
-          onPress={() => setSelectedPhoto(null)}
+        <View
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: 'rgba(20, 18, 26, 0.92)' }}>
           {selectedPhoto && (
-            <View
+            <Pressable
+              onPress={() => setSelectedPhoto(null)}
               className="overflow-hidden rounded-3xl border-[2.5px] border-white bg-ink"
-              style={{ width: '90%', height: '80%' }}>
+              style={{ width: '90%', height: '70%' }}>
               <Image
                 source={{ uri: imageUrl(selectedPhoto) }}
                 style={{ flex: 1 }}
                 contentFit="contain"
               />
-            </View>
+            </Pressable>
           )}
-        </Pressable>
+          <Button >
+                    Usuń przedmiot
+          </Button>
+        </View>
       </Modal>
     </View>
   );
