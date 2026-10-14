@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChunkyButton } from '@/components/chunky-button';
 import { ScreenHeader } from '@/components/screen-header';
+import { StepProgress } from '@/components/step-progress';
 import { API_URL } from '@/config';
 import { GROUPS, type Group } from '@/constants/categories';
 import { hardShadow } from '@/constants/theme';
@@ -17,7 +18,7 @@ const CHIP_ON_INK = '#F7F2FE';
 const ACCENT = '#F7B8D4';
 const PLACEHOLDER = '#5B4A7E';
 
-export default function AddItemStep3Screen() {
+export default function AddItemStep2Screen() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
@@ -73,13 +74,17 @@ export default function AddItemStep3Screen() {
 
   return (
     <View className="flex-1 bg-surface">
-      <ScreenHeader title="Opisz przedmiot" subtitle="krok 3 z 3" onBack={goBack} />
+      <ScreenHeader title="Opisz przedmiot" subtitle="krok 2 z 2" onBack={goBack} />
 
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-8 pt-5"
         keyboardShouldPersistTaps="handled">
-        <View className="flex-row items-center gap-4 px-6">
+        <View className="px-6">
+          <StepProgress step={2} totalSteps={2} />
+        </View>
+
+        <View className="mt-5 flex-row items-center gap-4 px-6">
           <View
             className="h-[110px] w-[110px] overflow-hidden rounded-2xl border-[2.5px] border-ink bg-lavender"
             style={hardShadow(4)}>
@@ -87,7 +92,6 @@ export default function AddItemStep3Screen() {
           </View>
 
           <View className="min-w-0 flex-1">
-            <Text className="font-mono text-[14px] text-plum">tło usunięte</Text>
             <Text className="mt-1 font-mono text-[14px] text-plum">gotowe do zapisu</Text>
           </View>
         </View>

@@ -82,12 +82,12 @@ export default function AddItemScreen() {
     <View className="flex-1 bg-surface">
       <ScreenHeader
         title="Dodaj ubranie"
-        subtitle="krok 1 z 3"
+        subtitle="krok 1 z 2"
         onBack={goBack}
       />
 
       <View className="flex-1 px-6 pt-5">
-        <StepProgress step={1} totalSteps={3} />
+        <StepProgress step={1} totalSteps={2} />
 
         <View className="my-5 flex-1">
           <CameraFrame>
@@ -117,7 +117,7 @@ export default function AddItemScreen() {
             Połóż ubranie na płaskiej powierzchni
           </Text>
           <Text className="mt-1 text-[14px] leading-5 text-muted">
-            Jasne tło i rozprostowane rękawy - wycięcie wyjdzie czysto.
+            Jasne tło i rozprostowane rękawy.
           </Text>
         </View>
 
