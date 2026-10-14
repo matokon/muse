@@ -8,6 +8,9 @@ pl:
       clothing_item:
         name: "Nazwa"
         photo: "Zdjęcie"
+      inspiration:
+        caption: "Podpis"
+        image: "Zdjęcie"
     errors:
       models:
         user:
@@ -26,6 +29,14 @@ pl:
             name:
               blank: "nie może być pusta"
             photo:
+              invalid_content_type: "musi być plikiem JPEG, PNG, WEBP lub HEIC"
+              too_large: "nie może być większe niż %{count} MB"
+        inspiration:
+          attributes:
+            caption:
+              blank: "nie może być pusty"
+            image:
+              blank: "nie może być puste"
               invalid_content_type: "musi być plikiem JPEG, PNG, WEBP lub HEIC"
               too_large: "nie może być większe niż %{count} MB"
   api:

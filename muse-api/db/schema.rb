@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
     t.index ["user_id"], name: "index_clothing_items_on_user_id"
   end
 
+  create_table "inspirations", force: :cascade do |t|
+    t.text "caption", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_inspirations_on_user_id"
+  end
+
   create_table "outfit_clothing_items", force: :cascade do |t|
     t.bigint "clothing_item_id", null: false
     t.datetime "created_at", null: false
@@ -93,6 +101,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "categories", "users"
   add_foreign_key "clothing_items", "users"
+  add_foreign_key "inspirations", "users"
   add_foreign_key "outfit_clothing_items", "clothing_items"
   add_foreign_key "outfit_clothing_items", "outfits"
   add_foreign_key "outfits", "categories"

@@ -14,4 +14,5 @@ Rails.application.routes.draw do
     delete "photos/:photo_id", action: :destroy_photo, on: :member
   end
   resources :categories,     only: [:index, :create, :destroy]
+  resources :inspirations,   only: [ :index, :create, :destroy ]
 end

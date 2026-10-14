@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :outfits, dependent: :destroy
   has_many :categories, dependent: :destroy
   has_many :clothing_items
+  has_many :inspirations, dependent: :destroy
   normalizes :email, with: ->(email) { email.strip.downcase }
 
   validates :email, presence: true,
