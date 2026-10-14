@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { ChunkyButton } from '@/components/chunky-button';
@@ -50,6 +51,7 @@ function imageUrl(url: string) {
 
 export default function OutfitScreen() {
   const { outfitId } = useLocalSearchParams<{ outfitId: string }>();
+  const insets = useSafeAreaInsets();
   const [outfit, setOutfit] = useState<Outfit | null>(null);
   const [clothingItems, setClothingItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -253,6 +255,12 @@ export default function OutfitScreen() {
           <Text className="mt-4 text-center text-[14px] font-semibold text-plum">{error}</Text>
         )}
       </ScrollView>
+
+      <View className="px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        <ChunkyButton onPress={() => router.push(`/edit-outfit/${outfit.id}`)}>
+          <Text className="text-xl font-bold text-ink">Edytuj outfit</Text>
+        </ChunkyButton>
+      </View>
 
       <Modal
         visible={showAll}

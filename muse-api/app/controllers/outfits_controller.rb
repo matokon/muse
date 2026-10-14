@@ -32,7 +32,21 @@ class OutfitsController < ApplicationController
   end
 
   def update
-    if @outfit.update(outfit_params)
+    attrs = outfit_params
+    new_photos = attrs.delete(:photos)
+
+    updated = Outfit.transaction do
+      @outfit.assign_attributes(attrs)
+      @outfit.photos.attach(new_photos) if new_photos.present?
+
+      unless @outfit.save
+        raise ActiveRecord::Rollback
+      end
+
+      true
+    end
+
+    if updated
       render json: {
         outfit: OutfitSerializer.new(@outfit).serializable_hash
       }
