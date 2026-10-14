@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   get  "me"     => "users#me"
 
   resources :clothing_items, only: [:index, :show, :create, :update, :destroy]
-  resources :outfits,        only: [:index, :show, :create, :update, :destroy]
+  resources :outfits, only: [ :index, :show, :create, :update, :destroy ] do
+    delete "photos/:photo_id", action: :destroy_photo, on: :member
+  end
   resources :categories,     only: [:index, :create, :destroy]
 end

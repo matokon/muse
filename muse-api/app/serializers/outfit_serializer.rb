@@ -1,15 +1,20 @@
 class OutfitSerializer < ActiveModel::Serializer
-  attributes :id, :created_at, :category, :photo_urls, :clothing_items_count
+  attributes :id, :created_at, :category, :photos, :photo_urls, :clothing_items_count
 
   def category
     object.category&.as_json(only: [:id, :name])
   end
 
   def photo_urls
-    return [] unless object.photos.attached?
+    photos.map { |photo| photo[:url] }
+  end
 
+  def photos
     object.photos.map do |photo|
-      Rails.application.routes.url_helpers.rails_blob_url(photo, only_path: true)
+      {
+        id: photo.id,
+        url: Rails.application.routes.url_helpers.rails_blob_url(photo, only_path: true)
+      }
     end
   end
 

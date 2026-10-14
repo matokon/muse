@@ -1,5 +1,5 @@
 class OutfitsController < ApplicationController
-  before_action :set_outfit, only: [:show, :update, :destroy]
+  before_action :set_outfit, only: [ :show, :update, :destroy, :destroy_photo ]
 
   def index
     outfits = current_user.outfits.order(created_at: :desc)
@@ -43,6 +43,18 @@ class OutfitsController < ApplicationController
 
   def destroy
     @outfit.destroy
+    head :no_content
+  end
+
+  def destroy_photo
+    photo = @outfit.photos.attachments.find_by(id: params[:photo_id])
+
+    unless photo
+      render json: { errors: [ "Nie znaleziono zdjęcia" ] }, status: :not_found
+      return
+    end
+
+    photo.purge
     head :no_content
   end
 

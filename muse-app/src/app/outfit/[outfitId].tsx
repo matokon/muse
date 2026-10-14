@@ -10,15 +10,22 @@ import {
   View,
 } from 'react-native';
 
+import { Button } from '@/components/button';
+import { ChunkyButton } from '@/components/chunky-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { API_URL } from '@/config';
-import { hardShadow, INK } from '@/constants/theme';
+import { INK } from '@/constants/theme';
 import { getToken } from '@/lib/token-storage';
-import { Button } from '@/components/button';
+
+type OutfitPhoto = {
+  id: number;
+  url: string;
+};
 
 type Outfit = {
   id: number;
   created_at: string;
+  photos: OutfitPhoto[];
   photo_urls: string[];
   clothing_items_count: number;
 };
@@ -48,7 +55,10 @@ export default function OutfitScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<OutfitPhoto | null>(null);
+  const [confirmingPhotoDelete, setConfirmingPhotoDelete] = useState(false);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
+  const [photoDeleteError, setPhotoDeleteError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -85,6 +95,65 @@ export default function OutfitScreen() {
     return router.canGoBack() ? router.back() : router.replace('/outfits');
   }
 
+  function closePhotoModal() {
+    if (deletingPhoto) return;
+
+    if (confirmingPhotoDelete) {
+      setConfirmingPhotoDelete(false);
+      setPhotoDeleteError(null);
+      return;
+    }
+
+    setSelectedPhoto(null);
+  }
+
+  function askToRemoveSelectedPhoto() {
+    setPhotoDeleteError(null);
+    setConfirmingPhotoDelete(true);
+  }
+
+  async function removeSelectedPhoto() {
+    if (!selectedPhoto || deletingPhoto) return;
+
+    setDeletingPhoto(true);
+    setPhotoDeleteError(null);
+
+    try {
+      const token = await getToken();
+      const res = await fetch(
+        `${API_URL}/outfits/${outfitId}/photos/${selectedPhoto.id}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setPhotoDeleteError(data?.errors?.[0] ?? 'Nie udało się usunąć zdjęcia');
+        return;
+      }
+
+      const deletedPhoto = selectedPhoto;
+      setOutfit((current) =>
+        current
+          ? {
+              ...current,
+              photos: current.photos.filter((photo) => photo.id !== deletedPhoto.id),
+              photo_urls: current.photo_urls.filter((url) => url !== deletedPhoto.url),
+            }
+          : current,
+      );
+      setConfirmingPhotoDelete(false);
+      setSelectedPhoto(null);
+    } catch (err) {
+      console.error('[outfit] remove photo', err);
+      setPhotoDeleteError('Brak połączenia z serwerem');
+    } finally {
+      setDeletingPhoto(false);
+    }
+  }
+
   if (loading) {
     return (
       <View className="flex-1 bg-surface">
@@ -112,7 +181,7 @@ export default function OutfitScreen() {
   const clothingItemsLabel = `${outfit.clothing_items_count} ${
     outfit.clothing_items_count === 1 ? 'przedmiot' : 'przedmiotów'
   }`;
-  const outfitPhotosCount = outfit.photo_urls.length;
+  const outfitPhotosCount = outfit.photos.length;
   const outfitPhotosLabel =
     outfitPhotosCount === 1 ? 'Zdjęcie w tym zestawie' : 'Zdjęcia w tym zestawie';
 
@@ -157,14 +226,14 @@ export default function OutfitScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 12 }}>
-              {outfit.photo_urls.map((photoUrl, index) => (
+              {outfit.photos.map((photo) => (
                 <Pressable
-                  onPress={() => setSelectedPhoto(photoUrl)}
-                  key={`${photoUrl}-${index}`}
+                  onPress={() => setSelectedPhoto(photo)}
+                  key={photo.id}
                   className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-lavender"
                   style={{ width: OUTFIT_PHOTO_WIDTH, height: OUTFIT_PHOTO_HEIGHT }}>
                   <Image
-                    source={{ uri: imageUrl(photoUrl) }}
+                    source={{ uri: imageUrl(photo.url) }}
                     style={{ flex: 1 }}
                     contentFit="cover"
                   />
@@ -236,25 +305,65 @@ export default function OutfitScreen() {
         transparent
         animationType="fade"
         statusBarTranslucent
-        onRequestClose={() => setSelectedPhoto(null)}>
+        onRequestClose={closePhotoModal}>
         <View
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: 'rgba(20, 18, 26, 0.92)' }}>
           {selectedPhoto && (
             <Pressable
-              onPress={() => setSelectedPhoto(null)}
+              onPress={closePhotoModal}
               className="overflow-hidden rounded-3xl border-[2.5px] border-white bg-ink"
               style={{ width: '90%', height: '70%' }}>
               <Image
-                source={{ uri: imageUrl(selectedPhoto) }}
+                source={{ uri: imageUrl(selectedPhoto.url) }}
                 style={{ flex: 1 }}
                 contentFit="contain"
               />
             </Pressable>
           )}
-          <Button >
-                    Usuń przedmiot
-          </Button>
+          <View className="mt-6 w-[90%]">
+            <Button onPress={askToRemoveSelectedPhoto}>Usuń zdjęcie</Button>
+          </View>
+
+          {selectedPhoto && confirmingPhotoDelete && (
+            <View
+              className="absolute bottom-0 left-0 right-0 top-0 justify-end"
+              style={{ backgroundColor: 'rgba(20, 18, 26, 0.55)' }}>
+              <View className="w-full rounded-t-[28px] border-[2.5px] border-ink bg-surface px-6 pb-10 pt-7">
+                <Text className="text-[22px] font-extrabold tracking-tight text-ink">
+                  Usunąć zdjęcie?
+                </Text>
+                <Text className="mt-3 text-[15px] leading-6 text-muted">
+                  Zdjęcie zostanie trwale usunięte z tego outfitu. Tego nie da się cofnąć.
+                </Text>
+                {!!photoDeleteError && (
+                  <Text className="mt-3 text-[14px] font-semibold text-plum">
+                    {photoDeleteError}
+                  </Text>
+                )}
+
+                <View className="mt-7 flex-row gap-4">
+                  <View className="flex-1">
+                    <Button
+                      onPress={() => {
+                        setConfirmingPhotoDelete(false);
+                        setPhotoDeleteError(null);
+                      }}
+                      disabled={deletingPhoto}>
+                      Zostaw
+                    </Button>
+                  </View>
+                  <View className="flex-1">
+                    <ChunkyButton onPress={removeSelectedPhoto} disabled={deletingPhoto}>
+                      <Text className="text-base font-bold text-ink">
+                        {deletingPhoto ? 'Usuwam…' : 'Usuń'}
+                      </Text>
+                    </ChunkyButton>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       </Modal>
     </View>
