@@ -44,6 +44,8 @@ const PHOTO_OPTIONS: {
 const MODAL_TILE = 96;
 const PREVIEW_SLOTS = 4;
 const MAX_PHOTOS = 5;
+const PHOTO_PREVIEW_WIDTH = 88;
+const PHOTO_PREVIEW_HEIGHT = 110;
 
 export default function AddOutfitScreen() {
   const { categoryId, categoryName } = useLocalSearchParams<{
@@ -76,6 +78,7 @@ export default function AddOutfitScreen() {
 
   const over = Math.max(0, selectedItems.length - (PREVIEW_SLOTS - 1));
   const preview = selectedItems.slice(0, PREVIEW_SLOTS - 1);
+  const remainingPhotoSlots = MAX_PHOTOS - photos.length;
 
   const remainder = selectedItems.length % 3;
   const modalItems: (Item | null)[] =
@@ -125,12 +128,21 @@ export default function AddOutfitScreen() {
     return selectedItems.some((i) => i.id === item.id);
   }
 
+  function ensurePhotoSlot() {
+    if (remainingPhotoSlots > 0) return true;
+
+    setError(`Outfit może mieć maksymalnie ${MAX_PHOTOS} zdjęć`);
+    return false;
+  }
+
   async function pickFromGallery() {
+    if (!ensurePhotoSlot()) return;
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.7,
       allowsMultipleSelection: true,
-      selectionLimit: MAX_PHOTOS,
+      selectionLimit: remainingPhotoSlots,
     });
 
     if (!result.canceled) {
@@ -138,10 +150,13 @@ export default function AddOutfitScreen() {
         [...current, ...result.assets.map((a) => a.uri)].slice(0, MAX_PHOTOS),
       );
       setPhotoOption('gallery');
+      setError(null);
     }
   }
 
   async function takePhoto() {
+    if (!ensurePhotoSlot()) return;
+
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') return;
 
@@ -156,6 +171,7 @@ export default function AddOutfitScreen() {
         [...current, result.assets[0].uri].slice(0, MAX_PHOTOS),
       );
       setPhotoOption('camera');
+      setError(null);
     }
   }
 
@@ -163,6 +179,7 @@ export default function AddOutfitScreen() {
     if (key === 'none') {
       setPhotos([]);
       setPhotoOption('none');
+      setError(null);
       return;
     }
     if (key === 'gallery') {
@@ -173,6 +190,14 @@ export default function AddOutfitScreen() {
       takePhoto();
       return;
     }
+  }
+
+  function removePhoto(uri: string) {
+    setPhotos((current) => {
+      const next = current.filter((photoUri) => photoUri !== uri);
+      if (next.length === 0) setPhotoOption('none');
+      return next;
+    });
   }
 
   async function save() {
@@ -316,9 +341,12 @@ export default function AddOutfitScreen() {
           })}
         </ScrollView>
 
-        <Text className="mt-6 px-6 text-[15px] font-semibold text-ink">
-          Zdjęcie zestawu
-        </Text>
+        <View className="mt-6 flex-row items-center justify-between px-6">
+          <Text className="text-[15px] font-semibold text-ink">Zdjęcia zestawu</Text>
+          <Text className="text-[13px] font-semibold text-plum">
+            {photos.length}/{MAX_PHOTOS}
+          </Text>
+        </View>
 
         <View className="mt-3 flex-row gap-3 px-6">
           {PHOTO_OPTIONS.map((opt) => {
@@ -343,6 +371,29 @@ export default function AddOutfitScreen() {
             );
           })}
         </View>
+
+        {photos.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ flexGrow: 0 }}
+            contentContainerStyle={{ gap: 10, paddingHorizontal: 24, paddingTop: 16 }}>
+            {photos.map((uri, index) => (
+              <Pressable
+                key={`${uri}-${index}`}
+                onPress={() => removePhoto(uri)}
+                className="overflow-hidden rounded-2xl border-[2.5px] border-accent bg-lavender"
+                style={{ width: PHOTO_PREVIEW_WIDTH, height: PHOTO_PREVIEW_HEIGHT }}>
+                <Image source={{ uri }} style={{ flex: 1 }} contentFit="cover" />
+                <View className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-white">
+                  <Text className="text-[16px] font-bold text-ink" style={{ lineHeight: 18 }}>
+                    ×
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
 
         {error && (
           <Text className="mt-4 px-6 text-center text-[14px] font-semibold text-plum">
