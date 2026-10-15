@@ -13,9 +13,9 @@ import { getToken, saveToken } from '@/lib/token-storage';
 type Mode = 'login' | 'signup';
 
 const BENEFITS = [
-  'Szafa z automatycznie wyciętymi ubraniami',
+  'Cała Twoja szafa zawsze pod ręką',
   'Outfity składane w kilka sekund',
-  '5 przymiarek AI dziennie za darmo',
+  'Inspiruj się i planuj kolejne stylizacje',
 ];
 
 export default function AuthScreen() {
