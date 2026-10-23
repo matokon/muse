@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   post "signup" => "auth#signup"
   post "login"  => "auth#login"
   get  "me"     => "users#me"
+  delete "me"   => "users#destroy"
 
   resources :clothing_items, only: [:index, :show, :create, :update, :destroy]
   resources :outfits, only: [ :index, :show, :create, :update, :destroy ] do
