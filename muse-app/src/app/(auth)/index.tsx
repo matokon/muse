@@ -44,7 +44,7 @@ export default function OnboardingScreen() {
         className="border-b-[2.5px] border-ink bg-header-pink px-6 pb-5"
         style={{ paddingTop: insets.top + 8 }}>
         <Text className="text-[34px] font-extrabold tracking-tight text-ink">Muse</Text>
-        <Text className="mt-0.5 font-mono text-[13px] text-ink">twoja szafa, cyfrowo</Text>
+        <Text className="mt-0.5 text-[13px] text-ink">twoja szafa, cyfrowo</Text>
       </View>
 
       <View className="flex-1 px-6 pt-6" style={{ paddingBottom: insets.bottom }}>
