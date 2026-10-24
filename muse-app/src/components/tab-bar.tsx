@@ -20,7 +20,7 @@ const ICONS: Record<string, SFSymbol> = {
   profile: 'person.crop.circle',
 };
 
-export function TabBar({ state, descriptors, navigation }: TabBarProps) {
+export function TabBar({ state, descriptors, emitter, navigateToTab }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   function renderTab(route: TabRoute, index: number) {
@@ -29,9 +29,9 @@ export function TabBar({ state, descriptors, navigation }: TabBarProps) {
     const label = options.title ?? route.name;
 
     function onPress() {
-      const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+      const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
       if (!focused && !event.defaultPrevented) {
-        navigation.navigate(route.name);
+        navigateToTab(route.key);
       }
     }
 
