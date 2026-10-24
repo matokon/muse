@@ -71,7 +71,7 @@ export default function ProfileScreen() {
     try {
       await deleteToken();
       setUser(null);
-      router.replace('/auth');
+      router.replace('/');
     } catch (err) {
       console.error('[profile] sign out', err);
       setError('Nie udało się wylogować');
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
       await deleteToken();
       setUser(null);
       setConfirmingDelete(false);
-      router.replace('/auth');
+      router.replace('/');
     } catch (err) {
       console.error('[profile] remove account', err);
       setDeleteError('Brak połączenia z serwerem');
