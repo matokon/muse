@@ -22,7 +22,7 @@ export default function AuthScreen() {
   const insets = useSafeAreaInsets();
   const { mode: initialMode } = useLocalSearchParams<{ mode?: string }>();
   const [mode, setMode] = useState<Mode>(initialMode === 'login' ? 'login' : 'signup');
-  const [form, setForm] = useState({ email: '', password: '', name: '' });
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', name: '' });
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
@@ -54,8 +54,14 @@ export default function AuthScreen() {
   }
 
   async function handleSubmit() {
-    setSubmitting(true);
     setErrors([]);
+
+    if (!isLogin && form.password !== form.confirmPassword) {
+      setErrors(['Hasła nie są takie same']);
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const path = isLogin ? '/login' : '/signup';
@@ -114,9 +120,11 @@ export default function AuthScreen() {
             name={form.name}
             email={form.email}
             password={form.password}
+            confirmPassword={form.confirmPassword}
             onNameChange={(value) => setForm({ ...form, name: value })}
             onEmailChange={(value) => setForm({ ...form, email: value })}
             onPasswordChange={(value) => setForm({ ...form, password: value })}
+            onConfirmPasswordChange={(value) => setForm({ ...form, confirmPassword: value })}
           />
         )}
 
@@ -172,10 +180,12 @@ function SignupFields({
   name,
   email,
   password,
+  confirmPassword,
   onNameChange,
   onEmailChange,
   onPasswordChange,
-}: AuthFieldsProps) {
+  onConfirmPasswordChange,
+}: SignupFieldsProps) {
   return (
     <View className="gap-4">
       <Field
@@ -193,6 +203,12 @@ function SignupFields({
         onChangeText={onEmailChange}
       />
       <Field label="Hasło" secure value={password} onChangeText={onPasswordChange} />
+      <Field
+        label="Powtórz hasło"
+        secure
+        value={confirmPassword}
+        onChangeText={onConfirmPasswordChange}
+      />
     </View>
   );
 }
@@ -205,6 +221,11 @@ type AuthFieldsProps = {
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
 }
+
+type SignupFieldsProps = AuthFieldsProps & {
+  confirmPassword: string;
+  onConfirmPasswordChange: (value: string) => void;
+};
 
 function PasswordToggle({ visible, onPressIn, onPressOut }: PasswordToggleProps) {
   return (
