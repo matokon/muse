@@ -7,6 +7,8 @@ Rails.application.routes.draw do
 
   post "signup" => "auth#signup"
   post "login"  => "auth#login"
+  post "password_resets" => "password_resets#create", as: :password_resets
+  patch "password_resets/:token" => "password_resets#update", as: :password_reset
   get  "me"     => "users#me"
   delete "me"   => "users#destroy"
 

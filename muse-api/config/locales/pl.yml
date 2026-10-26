@@ -44,3 +44,8 @@ pl:
   auth:
     invalid_credentials: "Nieprawidłowy e-mail lub hasło"
     unauthorized: "Sesja wygasła, zaloguj się ponownie"
+  password_reset:
+    request_accepted: "Wysłaliśmy instrukcję zmiany hasła"
+    updated: "Hasło zostało zmienione"
+    invalid_token: "Link do zmiany hasła jest nieprawidłowy lub wygasł"
+    confirmation_mismatch: "Hasła nie są takie same"
