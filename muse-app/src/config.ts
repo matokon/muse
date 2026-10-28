@@ -7,4 +7,4 @@ function devApiUrl() {
   return host ? `http://${host}:${API_PORT}` : `http://localhost:${API_PORT}`;
 }
 
-export const API_URL = devApiUrl();
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? devApiUrl();
