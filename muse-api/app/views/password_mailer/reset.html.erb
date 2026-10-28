@@ -2,6 +2,8 @@
 
 <p>Otrzymaliśmy prośbę o zmianę hasła do Twojego konta.</p>
 
-<p><%= link_to "Ustaw nowe hasło", @reset_url %></p>
+<p>Wpisz ten kod w aplikacji:</p>
 
-<p>Link jest ważny przez 30 minut. Jeśli nie wysyłałeś tej prośby, zignoruj tę wiadomość.</p>
+<p style="font-size: 32px; font-weight: bold; letter-spacing: 8px;"><%= @code %></p>
+
+<p>Kod jest ważny przez 10 minut. Jeśli nie wysyłałeś tej prośby, zignoruj tę wiadomość.</p>
