@@ -167,7 +167,7 @@ function LoginFields({ email, password, onEmailChange, onPasswordChange }: AuthF
         onChangeText={onEmailChange}
       />
       <Field label="Hasło" secure value={password} onChangeText={onPasswordChange} />
-      <Pressable>
+      <Pressable onPress={() => router.push('/forgot-password')}>
         <Text className="self-start font-mono text-[13px] underline text-ink">
           nie pamiętam hasła
         </Text>
@@ -275,7 +275,9 @@ function Field({
       <Text className="text-[13px] text-ink">{label}</Text>
       <View className="justify-center">
         <TextInput
+          key={`${label}-${secure ? 'secure' : 'plain'}`}
           className="rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-4 text-[15px] text-ink"
+          style={{ letterSpacing: 0 }}
           placeholder={placeholder}
           value={value}
           onChangeText={onChangeText}
