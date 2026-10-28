@@ -1,9 +1,7 @@
 class User < ApplicationRecord
-  has_secure_password
+  PASSWORD_RESET_CODE_EXPIRY = 10.minutes
 
-  generates_token_for :password_reset, expires_in: 30.minutes do
-    password_salt&.last(10)
-  end
+  has_secure_password
 
   has_many :outfits, dependent: :destroy
   has_many :categories, dependent: :destroy
@@ -15,4 +13,24 @@ class User < ApplicationRecord
                     uniqueness: { case_sensitive: false },
                     format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 8 }, allow_nil: true
+
+  def issue_password_reset_code!
+    code = SecureRandom.random_number(1_000_000).to_s.rjust(6, "0")
+
+    update!(
+      password_reset_code_digest: BCrypt::Password.create(code),
+      password_reset_code_sent_at: Time.current
+    )
+
+    code
+  end
+
+  def valid_password_reset_code?(code)
+    return false if code.blank? || password_reset_code_digest.blank? || password_reset_code_sent_at.blank?
+    return false if password_reset_code_sent_at < PASSWORD_RESET_CODE_EXPIRY.ago
+
+    BCrypt::Password.new(password_reset_code_digest).is_password?(code)
+  rescue BCrypt::Errors::InvalidHash
+    false
+  end
 end

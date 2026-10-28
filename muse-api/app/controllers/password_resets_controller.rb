@@ -1,19 +1,24 @@
 class PasswordResetsController < ApplicationController
   skip_before_action :authenticate_request
-  rate_limit to: 5, within: 1.minute, only: :create
+  rate_limit to: 5, within: 1.minute, only: :create, name: "password-reset-request"
+  rate_limit to: 5, within: 10.minutes, only: :update, name: "password-reset-update"
 
   def create
     user = User.find_by(email: normalized_email)
-    PasswordMailer.with(user: user).reset.deliver_later if user
+
+    if user
+      code = user.issue_password_reset_code!
+      PasswordMailer.with(user: user, code: code).reset.deliver_later
+    end
 
     render json: { message: I18n.t("password_reset.request_accepted") }, status: :accepted
   end
 
   def update
-    user = User.find_by_token_for(:password_reset, params[:token])
+    user = User.find_by(email: normalized_email)
 
-    unless user
-      return render json: { errors: [ I18n.t("password_reset.invalid_token") ] },
+    unless user&.valid_password_reset_code?(params[:code].to_s)
+      return render json: { errors: [ I18n.t("password_reset.invalid_code") ] },
                     status: :unprocessable_entity
     end
 
@@ -22,7 +27,11 @@ class PasswordResetsController < ApplicationController
                     status: :unprocessable_entity
     end
 
-    if user.update(password_params)
+    user.assign_attributes(password_params)
+    user.password_reset_code_digest = nil
+    user.password_reset_code_sent_at = nil
+
+    if user.save
       render json: { message: I18n.t("password_reset.updated") }, status: :ok
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
